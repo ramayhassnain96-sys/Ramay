@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAMAY BRAND COLLECTION</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #0f0f0f; color: #fff; margin: 0; padding: 0; }
+        header { padding: 30px 10px; text-align: center; }
+        .logo { font-size: 2rem; font-weight: 900; background: linear-gradient(to right, #fff, #666); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Mobile: 2 products per row */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px; }
+        
+        /* PC/Tablet: 3 products per row */
+        @media (min-width: 768px) {
+            .grid { grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 20px; }
+        }
+
+        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); padding: 10px; border-radius: 20px; cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.1); }
+        .card img { width: 100%; height: 160px; object-fit: cover; border-radius: 15px; }
+        .card-title { font-size: 0.85rem; font-weight: 700; margin-top: 8px; }
+        .card-desc { font-size: 0.65rem; color: #aaa; margin: 2px 0; height: 28px; overflow: hidden; }
+        .card-price { font-size: 0.8rem; color: #ff3838; font-weight: 700; }
+        
+        #detail-view { display:none; padding:20px; background: #0f0f0f; position:fixed; top:0; left:0; width:100%; height:100%; overflow-y:auto; z-index: 200; }
+        .btn-grad { background: linear-gradient(45deg, #6c5ce7, #a29bfe); color: white; border: none; padding: 15px; width: 100%; border-radius: 15px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<header><div class="logo">RAMAY BRAND COLLECTION</div></header>
+<div class="grid" id="product-list"></div>
+
+<div id="detail-view">
+    <button onclick="showHome()" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:10px; border-radius:10px; cursor:pointer;">← BACK</button>
+    <img id="d-img" style="width:100%; height:300px; object-fit:cover; border-radius:20px; margin-top:20px;">
+    <h2 id="d-title" style="font-size: 1.8rem; margin: 15px 0;"></h2>
+    <div id="d-price" style="font-size: 1.5rem; color: #ff3838; font-weight: 900;"></div>
+    <input type="text" id="promo" placeholder="Enter Promo Code" style="width:100%; padding:15px; border-radius:10px; background:#222; border:none; color:white; margin:15px 0; box-sizing:border-box;">
+    <button class="btn-grad" onclick="applyDiscount()">APPLY DISCOUNT</button>
+    <div id="success-box" style="color: #00ff88; margin: 10px 0; display: none; text-align: center;">🎉 DISCOUNT APPLIED!</div>
+    <a href="https://wa.me/923482218511" style="display:block; text-align:center; padding:15px; background:#25D366; color:white; text-decoration:none; border-radius:15px; margin-top:15px; font-weight:bold;">ORDER ON WHATSAPP</a>
+</div>
+
+<script>
+    let currentP = 0;
+    const products = [
+        {t: "Flora Elite", p: 3850, i: "https://i.postimg.cc/gjhhtgXS/3600-3.jpg", d: "Premium floral embroidery.\nLuxury daily wear."},
+        {t: "Breeze Sky", p: 3850, i: "https://i.postimg.cc/8cvvXZJX/3600-4.jpg", d: "Lightweight cooling fabric.\nPerfect for summer."},
+        {t: "Crimson Royal", p: 3850, i: "https://i.postimg.cc/T1bbNtLH/3600-5.jpg", d: "Deep bold crimson base.\nPremium event wear."},
+        {t: "Master Kurta", p: 7250, i: "https://i.postimg.cc/hGPcChQz/7000.jpg", d: "Flagship sharp modern fit.\nSophisticated style."},
+        {t: "Noir Classic", p: 7250, i: "https://i.postimg.cc/s26yby5M/7000-2.jpg", d: "Timeless black elegance.\nProfessional look."},
+        {t: "Royal Purple", p: 7250, i: "https://i.postimg.cc/g0Sd1d3w/7000-3.jpg", d: "Unique purple metallic.\nStand out style."},
+        {t: "Earth Tone", p: 7250, i: "https://i.postimg.cc/W4Wjxj0F/7000-4.jpg", d: "Natural organic comfort.\nCalm and classy."},
+        {t: "Beige Luxury", p: 7250, i: "https://i.postimg.cc/Pq3h0h18/7000-5.jpg", d: "Clean minimal finish.\nPure luxury style."},
+        {t: "Olive Elite", p: 7250, i: "https://i.postimg.cc/N0JYZYR2/7000-6.jpg", d: "Exclusive olive shade.\nHighly durable fabric."},
+        {t: "Grey Formal", p: 7250, i: "https://i.postimg.cc/pdXR0y59/7000-7.jpg", d: "Sharp office styling.\nProfessional finish."},
+        {t: "Soft Petal", p: 3750, i: "https://i.postimg.cc/6qZZbM2Y/3500.jpg", d: "Softest lawn material.\nGentle all-day feel."},
+        {t: "Summer Breeze", p: 3750, i: "https://i.postimg.cc/W3Cr7B3H/3500-(2).jpg", d: "Airy moisture-wicking.\nStay cool and fresh."},
+        {t: "Lawn Master", p: 3750, i: "https://i.postimg.cc/fyddq8tf/3500-(3).jpg", d: "High-quality vibrant lawn.\nColours never fade."},
+        {t: "Airy Touch", p: 3750, i: "https://i.postimg.cc/j5mNhp59/3500-(4).jpg", d: "Effortless light styling.\nModern trend design."},
+        {t: "Designer Edit", p: 3750, i: "https://i.postimg.cc/QC77Yf9m/3500-(5).jpg", d: "Exclusive artistic cut.\nFashion icon choice."},
+        {t: "Style Icon", p: 3750, i: "https://i.postimg.cc/j2ff3MwX/3500-(6).jpg", d: "Turn heads anywhere.\nDesigned for grace."},
+        {t: "Luxe Wear", p: 3850, i: "https://i.postimg.cc/5yzzKsYP/3600-(2).jpg", d: "Pure luxury experience.\nUnmatched prestige."},
+        {t: "Artisan Soul", p: 3650, i: "https://i.postimg.cc/bwntzCmZ/3400.jpg", d: "Authentic handcrafted.\nTraditional soul feel."},
+        {t: "Golden Hour", p: 3650, i: "https://i.postimg.cc/W1Zk2W53/3400-(2).jpg", d: "Radiant glow styling.\nBright daily wear."},
+        {t: "Craftsmanship", p: 3749, i: "https://i.postimg.cc/8zv61KZF/3499.jpg", d: "Superior build quality.\nStitched for longevity."},
+        {t: "Silk Touch", p: 3750, i: "https://i.postimg.cc/6qZZbM2Y/3500.jpg", d: "Silky smooth texture.\nPremium feel guaranteed."},
+        {t: "Grand Luxe", p: 3850, i: "https://i.postimg.cc/5yzzKsYP/3600-(2).jpg", d: "Grand event design.\nHigh-profile style."},
+        {t: "Chic Style", p: 3650, i: "https://i.postimg.cc/bwntzCmZ/3400.jpg", d: "Modern chic look.\nContemporary fashion."},
+        {t: "Golden Elite", p: 3650, i: "https://i.postimg.cc/W1Zk2W53/3400-(2).jpg", d: "Regal embroidery work.\nElite grand occasion."},
+        {t: "Master Piece", p: 3749, i: "https://i.postimg.cc/8zv61KZF/3499.jpg", d: "True design masterpiece.\nHigh-end aesthetic."}
+    ];
+
+    function showDetail(t, p, i) {
+        currentP = p;
+        history.pushState(null, null, "");
+        document.getElementById('product-list').style.display = 'none';
+        document.getElementById('detail-view').style.display = 'block';
+        document.getElementById('d-title').innerText = t;
+        document.getElementById('d-price').innerHTML = "Rs. " + p;
+        document.getElementById('d-img').src = i;
+    }
+
+    function showHome() {
+        document.getElementById('product-list').style.display = 'grid';
+        document.getElementById('detail-view').style.display = 'none';
+    }
+
+    function applyDiscount() {
+        if(document.getElementById('promo').value === "RAMAY1") {
+            document.getElementById('d-price').innerHTML = "<span style='text-decoration:line-through; color:#666;'>Rs. " + currentP + "</span> Rs. " + (currentP - 500);
+            document.getElementById('success-box').style.display = 'block';
+        }
+    }
+
+    const list = document.getElementById('product-list');
+    products.forEach(p => {
+        list.innerHTML += `<div class="card" onclick="showDetail('${p.t}', ${p.p}, '${p.i}')">
+                             <img src="${p.i}">
+                             <div class="card-title">${p.t}</div>
+                             <div class="card-desc">${p.d.replace('\n', '<br>')}</div>
+                             <div class="card-price">Rs. ${p.p}</div>
+                           </div>`;
+    });
+    window.onpopstate = showHome;
+</script>
+</body>
+</html>
